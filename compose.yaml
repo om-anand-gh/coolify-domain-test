@@ -1,0 +1,34 @@
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    networks:
+      - appnet
+
+  worker:
+    build:
+      context: ./worker
+    container_name: celery-worker
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    networks:
+      - appnet
+
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    container_name: fastapi-app
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    ports:
+      - "8080:8080"
+    networks:
+      - appnet
+
+networks:
+  appnet:
